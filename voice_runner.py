@@ -1,0 +1,49 @@
+from input.voice_input.wake_listener import wake_up_detection
+from input.voice_input.stream_transcriber import record_audio
+from agent.intent_router import rule_based_intent
+from actions.action_executor import execute_action
+import threading
+import sys
+import comtypes
+import keyboard
+
+stop_event = threading.Event()
+
+def voice_thread():
+    comtypes.CoInitialize()
+    print("Voice is Called...")
+    while not stop_event.is_set():
+        wake_up_detection(stop_event)
+        if stop_event.is_set():
+            break
+        transcribed_text = record_audio()
+        print("Transcription: ",transcribed_text)
+        
+        macro = rule_based_intent(transcribed_text)
+        print(macro)
+        
+        if macro:
+            print(macro)
+            execute_action(macro["action"])
+        else:
+            print("No matching macro found.")
+        
+def killMainThread():
+    keyboard.wait('q')
+    stop_event.set()
+    print("Killing main thread")
+
+print("Assistant is running...")
+# voice_thread()
+
+t1 = threading.Thread(target = voice_thread)
+t2 = threading.Thread(target = killMainThread)
+t1.start()
+t2.start()
+
+try:
+    t1.join()
+    t2.join()
+except KeyboardInterrupt:
+    print("Exiting gesture control")
+    sys.exit()

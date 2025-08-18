@@ -1,0 +1,17 @@
+{
+  "daily": {
+    "mute": { "action": "mute" },
+    "open brave": { "action": "open brave" },
+    "close tab": { "action": "close tab" },
+    "start download": { "action": "start download" },
+    "print" : {"action": "print" },
+    
+    "next tab" : {"action" : "next tab"},
+    "prev tab" : {"action" : "prev tab"},
+    "volume up" : {"action" : "volume up"}
+  },
+  "wuthering waves":{
+    "parry":{"action": "parry" },
+    "open menu":{"action" : "open menu" }
+    }
+}
