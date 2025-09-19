@@ -4,6 +4,11 @@ from comtypes import CLSCTX_ALL
 import pyautogui
 import webbrowser
 
+
+# ------------------------------------------------------
+# All these functions are represent each action
+
+
 def mute():
     # print("Mute the system")
     devices = AudioUtilities.GetSpeakers()
@@ -58,6 +63,10 @@ def volume_up():
     volume.SetMasterVolumeLevelScalar(newVolume, None)
     
     
+# ---------------------------------------------------------------------------------------------------    
+
+# Dispatcher holds a copy all the commands to do their respective action
+# TODO: Need to connect this to the JSON file instead of having all of it hardcoded to this 
 dispatcher = {
     "mute": mute,
     "close tab": close_tab,
@@ -73,6 +82,7 @@ dispatcher = {
 
 def execute_action(action):
     
+    # Finds the command in dispatcher array and executed the action
     if action in dispatcher:
         print(action)
         return dispatcher[action]()

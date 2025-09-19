@@ -6,6 +6,7 @@ import os
 import noisereduce as nr
 from scipy.signal import butter, lfilter
 
+# TODO: use the json file to check for the command word not an array
 known_phrases = ["mute", "open brave", "close tab", "start download", "print","parry","open menu", "next tab", "prev tab", "volume up"]
 base_dir = os.path.dirname(__file__)  # e.g. .../input/voice_input
 model_path = os.path.abspath(os.path.join(base_dir, "../../models/vosk-model-small-en-us-0.15"))
@@ -26,8 +27,11 @@ rec = KaldiRecognizer(model, 16000, json.dumps(known_phrases))
 #     else:
 #         return audio/peak
 
+# Used to record commands and check in the array if they exist
+# If the command exists then, it will return the word
 def record_audio(duration = 2, fs=16000):
     print("Recording now")
+    # Does the recording
     audio = sd.rec(int(duration * fs), samplerate = fs, channels = 1, dtype = 'int16')
     sd.wait()
     
@@ -40,14 +44,14 @@ def record_audio(duration = 2, fs=16000):
     # print(f"DEBUG: Transcribed text = '{audio}'")
 
     # audio_bytes = audio_int16.tobytes()
+    # Manipulate the audio to make more comprehensible
     audio_bytes = audio.tobytes()
     rec.AcceptWaveform(audio_bytes)
     result = rec.FinalResult()
     print("Vosk result:", result)
- 
+
     text = json.loads(result).get("text", "").strip()
-    
-    
+
     if text:
         # print("📝 Transcript:", text)
         return text

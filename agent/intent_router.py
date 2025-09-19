@@ -58,6 +58,35 @@ def rule_based_intent(text):
     if action:
         # print(action)
         return action
+
+# Used to link the macro_path variable to the macros json file
+base_dir = os.path.dirname(__file__)
+macro_path = os.path.join(base_dir, "../config/macros.json")
+
+# Hard-coded the mode
+#TODO: change this hard-coded mode into a state and have it change
+mode = "daily"
+
+# Saves the entire json sile into the macros variable
+with open(os.path.abspath(macro_path)) as f:
+    macros = json.load(f)
+    # DEBUG
+    # print(macros)
+
+def rule_based_intent(text):
+    # Turn the command into lower case
+    text = text.lower()
+    # Get action linked to the specified command
+    action = macros.get(mode,{}).get(text)
+    # DEBUG
+    # print(action)
+    if action:
+        # DEBUG
+        # print(action)
+        # If action was found, then return it
+        return action
+    
+    # TODO: Create logic when the action was not found
          
 # if __name__ == "__main__":
 #     result = rule_based_intent("mute")
