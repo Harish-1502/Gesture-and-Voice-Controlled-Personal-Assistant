@@ -1,6 +1,6 @@
 from input.voice_input.wake_listener import wake_up_detection
 from input.voice_input.stream_transcriber import record_audio
-from agent.intent_router import rule_based_intent
+from agent.intent_router import rule_based_intent, db_init
 from actions.action_executor import execute_action
 import threading
 import sys
@@ -13,7 +13,7 @@ stop_event = threading.Event()
 def voice_thread():
     comtypes.CoInitialize()
     print("Voice is Called...")
-
+    db_init()
     while not stop_event.is_set():
         # Used to active the voice detection
         wake_up_detection(stop_event)
