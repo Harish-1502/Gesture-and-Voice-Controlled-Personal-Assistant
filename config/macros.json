@@ -5,9 +5,8 @@
     "close tab": { "action": "close tab" },
     "start download": { "action": "start download" },
     "print" : {"action": "print" },
-    
     "next tab" : {"action" : "next tab"},
-    "prev tab" : {"action" : "prev tab"},
+    "previous tab" : {"action" : "previous tab"},
     "volume up" : {"action" : "volume up"}
   },
   "wuthering waves":{

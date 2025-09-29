@@ -5,27 +5,34 @@ import json
 import os
 import noisereduce as nr
 from scipy.signal import butter, lfilter
+import difflib
 
-# TODO: use the json file to check for the command word not an array
-known_phrases = ["mute", "open brave", "close tab", "start download", "print","parry","open menu", "next tab", "prev tab", "volume up"]
+known_phrases = []
+
+with open("config/macros.json") as f:
+    command_map = json.load(f)
+for group in command_map.values(): #For each mode 
+    if isinstance(group, dict): #If each mode has it's own dict
+        known_phrases.extend(group.keys()) #Returns all the keys
+
 base_dir = os.path.dirname(__file__)  # e.g. .../input/voice_input
 model_path = os.path.abspath(os.path.join(base_dir, "../../models/vosk-model-small-en-us-0.15"))
 model = Model(model_path)
 rec = KaldiRecognizer(model, 16000, json.dumps(known_phrases))
 
-# def highpass_filter(audio, cutoff = 100, fs = 16000, order = 5):
-#     nyquist = 0.5 * fs
-#     normal_cutoff = cutoff / nyquist
-#     b, a = butter(order, normal_cutoff, btype='high', analog=False)
-#     filtered_audio = lfilter(b,a,audio)
-#     return filtered_audio
+def highpass_filter(audio, cutoff = 100, fs = 16000, order = 5):
+    nyquist = 0.5 * fs
+    normal_cutoff = cutoff / nyquist
+    b, a = butter(order, normal_cutoff, btype='high', analog=False)
+    filtered_audio = lfilter(b,a,audio)
+    return filtered_audio
 
-# def normalize_audio(audio):
-#     peak = np.max(np.abs(audio))
-#     if peak == 0:
-#         return audio
-#     else:
-#         return audio/peak
+def normalize_audio(audio):
+    peak = np.max(np.abs(audio))
+    if peak == 0:
+        return audio
+    else:
+        return audio/peak
 
 # Used to record commands and check in the array if they exist
 # If the command exists then, it will return the word
@@ -37,15 +44,15 @@ def record_audio(duration = 2, fs=16000):
     
     audio = np.squeeze(audio)  # flatten shape: (n,1) → (n,)
     
-    # audio = highpass_filter(audio,cutoff=100,fs=fs)
-    # audio = nr.reduce_noise(y = audio,sr = fs)
-    # audio = normalize_audio(audio)
-    # audio_int16 = (audio * 32767).astype(np.int16)
+    audio = highpass_filter(audio,cutoff=100,fs=fs)
+    audio = nr.reduce_noise(y = audio,sr = fs)
+    audio = normalize_audio(audio)
+    audio_int16 = (audio * 32767).astype(np.int16)
+    # Manipulate the audio to make more comprehensible
+    audio_bytes = audio_int16.tobytes()
     # print(f"DEBUG: Transcribed text = '{audio}'")
 
-    # audio_bytes = audio_int16.tobytes()
-    # Manipulate the audio to make more comprehensible
-    audio_bytes = audio.tobytes()
+    # audio_bytes = audio.tobytes()
     rec.AcceptWaveform(audio_bytes)
     result = rec.FinalResult()
     print("Vosk result:", result)
@@ -54,7 +61,20 @@ def record_audio(duration = 2, fs=16000):
 
     if text:
         # print("📝 Transcript:", text)
-        return text
+        if text in known_phrases:
+            print("Exact match found")
+            return text
+        else:
+            best_match = find_match(text,known_phrases)
+            if best_match:
+                print(f"Using find_match to eliminate fuzzy words: {best_match}")
+                return best_match
+            else:
+                return ""
     else:
         # print("⚠️ Still no recognizable speech.")
         return ""
+    
+def find_match(text, known_phrases, cutoff=0.75):
+    matches = difflib.get_close_matches(text, known_phrases, n=1, cutoff=cutoff)
+    return matches[0] if matches else None

@@ -42,32 +42,19 @@
 
 import json
 import os
-
-base_dir = os.path.dirname(__file__)
-macro_path = os.path.join(base_dir, "../config/macros.json")
-
-mode = "daily"
-with open(os.path.abspath(macro_path)) as f:
-    macros = json.load(f)
-    # print(macros)
-
-def rule_based_intent(text):
-    text = text.lower()
-    action = macros.get(mode,{}).get(text)
-    # print(action)
-    if action:
-        # print(action)
-        return action
+import sqlite3
 
 # Used to link the macro_path variable to the macros json file
 base_dir = os.path.dirname(__file__)
 macro_path = os.path.join(base_dir, "../config/macros.json")
+macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
 
 # Hard-coded the mode
 #TODO: change this hard-coded mode into a state and have it change
-mode = "daily"
+# mode = "daily"
+db_connect = sqlite3.connect(macro_manager_path)
 
-# Saves the entire json sile into the macros variable
+# Saves the entire json file into the macros variable
 with open(os.path.abspath(macro_path)) as f:
     macros = json.load(f)
     # DEBUG

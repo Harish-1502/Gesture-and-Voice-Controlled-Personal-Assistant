@@ -3,7 +3,7 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 import pyautogui
 import webbrowser
-
+import json
 
 # ------------------------------------------------------
 # All these functions are represent each action
@@ -51,7 +51,7 @@ def open_menu():
 def next_tab():
     pyautogui.hotkey('ctrl', 'tab')
     
-def prev_tab():
+def previous_tab():
     pyautogui.hotkey('ctrl', 'shift', 'tab')
 
 def volume_up():
@@ -66,22 +66,20 @@ def volume_up():
 # ---------------------------------------------------------------------------------------------------    
 
 # Dispatcher holds a copy all the commands to do their respective action
-# TODO: Need to connect this to the JSON file instead of having all of it hardcoded to this 
-dispatcher = {
-    "mute": mute,
-    "close tab": close_tab,
-    "open brave": open_brave,
-    "start downloading": download,
-    "print": print_doc,
-    "parry": parry,
-    "open menu": open_menu,
-    "next tab" : next_tab,
-    "prev tab" :  prev_tab,
-    "volume up" : volume_up
-}
+dispatcher = {}
+
+with open("config/macros.json") as f:
+    command_map = json.load(f)
+for group in command_map.values(): #For each mode 
+    if isinstance(group, dict): #If each mode has it's own dict
+        for command,action in group.items():
+            action_detail = action.get("action")
+            global_function = globals().get(action_detail.replace(" ","_"))
+            if global_function:
+                dispatcher[command] = global_function
 
 def execute_action(action):
-    
+    print(dispatcher)
     # Finds the command in dispatcher array and executed the action
     if action in dispatcher:
         print(action)

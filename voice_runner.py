@@ -25,10 +25,10 @@ def voice_thread():
         # Checks the transcribed audio with the json file to get the proper
         # command in its current mode
         macro = rule_based_intent(transcribed_text)
-        print(macro)
+        print("Macro: ", macro)
         
         if macro:
-            print(macro)
+            # print(macro)
             # Preforms action linked to the command
             execute_action(macro["action"])
         else:
