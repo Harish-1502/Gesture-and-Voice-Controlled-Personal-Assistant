@@ -15,6 +15,11 @@ for group in command_map.values(): #For each mode
     if isinstance(group, dict): #If each mode has it's own dict
         known_phrases.extend(group.keys()) #Returns all the keys
 
+with open("config/global_macros.json") as f:
+    command_map = json.load(f)
+known_phrases.extend(command_map.key())
+del command_map
+
 base_dir = os.path.dirname(__file__)  # e.g. .../input/voice_input
 model_path = os.path.abspath(os.path.join(base_dir, "../../models/vosk-model-small-en-us-0.15"))
 model = Model(model_path)
@@ -43,7 +48,6 @@ def record_audio(duration = 2, fs=16000):
     sd.wait()
     
     audio = np.squeeze(audio)  # flatten shape: (n,1) → (n,)
-    
     audio = highpass_filter(audio,cutoff=100,fs=fs)
     audio = nr.reduce_noise(y = audio,sr = fs)
     audio = normalize_audio(audio)

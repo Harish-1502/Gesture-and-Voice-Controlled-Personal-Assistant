@@ -62,7 +62,33 @@ def volume_up():
     newVolume = min(currentVolume+0.05,1.0)
     volume.SetMasterVolumeLevelScalar(newVolume, None)
     
+def set_mode(new_mode):
     
+    if new_mode in mode_list:
+        with sqlite3.connect(macro_manager_path) as conn:
+            conn.execute("""
+                INSERT OR REPLACE INTO state (key,value) VALUES (?,?) """, ("mode",new_mode))
+            conn.commit() 
+        return print("Mode change successful")
+    else:
+        return print("Mode change failed")
+
+def get_mode():
+    with sqlite3.connect(macro_manager_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT value FROM state WHERE key = 'mode'")
+        row = cursor.fetchone()
+        return row[0] if row else "daily"
+    
+def db_init():
+    with sqlite3.connect(macro_manager_path) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS state (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        conn.commit()
 # ---------------------------------------------------------------------------------------------------    
 
 # Dispatcher holds a copy all the commands to do their respective action
@@ -77,6 +103,14 @@ for group in command_map.values(): #For each mode
             global_function = globals().get(action_detail.replace(" ","_"))
             if global_function:
                 dispatcher[command] = global_function
+
+with open("config/global_macros.json") as f:
+    command_map = json.load(f)
+for command,action in command_map.items():
+    action_detail = action.get("action")
+    global_function = globals().get(action_detail.replace(" ","_"))
+    if global_function:
+        dispatcher[command] = global_function
 
 def execute_action(action):
     print(dispatcher)

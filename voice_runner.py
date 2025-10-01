@@ -1,6 +1,7 @@
 from input.voice_input.wake_listener import wake_up_detection
 from input.voice_input.stream_transcriber import record_audio
 from agent.intent_router import rule_based_intent, db_init
+from actions.action_executor import db_init
 from actions.action_executor import execute_action
 import threading
 import sys
