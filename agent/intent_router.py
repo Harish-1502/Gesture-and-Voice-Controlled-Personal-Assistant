@@ -43,16 +43,49 @@
 import json
 import os
 import sqlite3
+from actions.action_executor import get_mode
 
 # Used to link the macro_path variable to the macros json file
 base_dir = os.path.dirname(__file__)
 macro_path = os.path.join(base_dir, "../config/macros.json")
-macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
+global_macro_path = os.path.join(base_dir, "../config/global_macros.json")
+# macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
 
-# Hard-coded the mode
-#TODO: change this hard-coded mode into a state and have it change
-# mode = "daily"
-db_connect = sqlite3.connect(macro_manager_path)
+# mode_list = []
+# with open(os.path.abspath(macro_path)) as f:
+#     command_map = json.load(f)
+# for group in command_map.keys():
+#     mode_list.append(group)
+
+# current_mode = ""
+
+# def set_mode(new_mode):
+#     if new_mode in mode_list:
+#         with sqlite3.connect(macro_manager_path) as conn:
+#             conn.execute("""
+#                 INSERT OR REPLACE INTO state (key,value) VALUES (?,?) """, ("mode",new_mode))
+#             conn.commit() 
+#         return True
+#     else:
+#         return False
+    
+
+# def get_mode():
+#     with sqlite3.connect(macro_manager_path) as conn:
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT value FROM state WHERE key = 'mode'")
+#         row = cursor.fetchone()
+#         return row[0] if row else "daily"
+    
+# def db_init():
+#     with sqlite3.connect(macro_manager_path) as conn:
+#         conn.execute("""
+#             CREATE TABLE IF NOT EXISTS state (
+#                 key TEXT PRIMARY KEY,
+#                 value TEXT
+#             )
+#         """)
+#         conn.commit()
 
 # Saves the entire json file into the macros variable
 with open(os.path.abspath(macro_path)) as f:
@@ -60,11 +93,24 @@ with open(os.path.abspath(macro_path)) as f:
     # DEBUG
     # print(macros)
 
+with open(os.path.abspath(global_macro_path)) as f:
+    global_macros = json.load(f)
+
 def rule_based_intent(text):
     # Turn the command into lower case
     text = text.lower()
+    if text.startswith("change to"):
+        print(text)
+        # mode_name = text.split("change to", 1)[1].strip()
+        # print(mode_name)
+        # if mode_name.endswith(" mode"):
+        #     mode_name = mode_name[:-5].strip()
+        #     print(mode_name)
+        return {"action": text}
+
+    current_mode = get_mode()
     # Get action linked to the specified command
-    action = macros.get(mode,{}).get(text)
+    action = macros.get(current_mode,{}).get(text)
     # DEBUG
     # print(action)
     if action:
