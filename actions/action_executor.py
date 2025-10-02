@@ -4,7 +4,13 @@ from comtypes import CLSCTX_ALL
 import pyautogui
 import webbrowser
 import json
+import sqlite3
+import os
 
+
+base_dir = os.path.dirname(__file__)
+macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
+mode_list = []
 # ------------------------------------------------------
 # All these functions are represent each action
 
@@ -63,7 +69,6 @@ def volume_up():
     volume.SetMasterVolumeLevelScalar(newVolume, None)
     
 def set_mode(new_mode):
-    
     if new_mode in mode_list:
         with sqlite3.connect(macro_manager_path) as conn:
             conn.execute("""
@@ -104,13 +109,18 @@ for group in command_map.values(): #For each mode
             if global_function:
                 dispatcher[command] = global_function
 
-with open("config/global_macros.json") as f:
-    command_map = json.load(f)
-for command,action in command_map.items():
-    action_detail = action.get("action")
-    global_function = globals().get(action_detail.replace(" ","_"))
-    if global_function:
-        dispatcher[command] = global_function
+# with open("config/global_macros.json") as f:
+#     command_map = json.load(f)
+# for command,action in command_map.items():
+#     action_detail = action.get("action")
+#     global_function = globals().get(action_detail.replace(" ","_"))
+#     if global_function:
+#         dispatcher[command] = global_function
+# Used Lambda to link specific phrases to the set_mode in dispatcher
+for mode_name in command_map.keys():  
+    dispatcher[f"change to {mode_name}"] = (lambda m=mode_name: set_mode(m))
+    dispatcher[f"change to {mode_name} mode"] = (lambda m=mode_name: set_mode(m))
+    mode_list.append(mode_name)
 
 def execute_action(action):
     print(dispatcher)

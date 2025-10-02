@@ -1,6 +1,6 @@
 from input.voice_input.wake_listener import wake_up_detection
 from input.voice_input.stream_transcriber import record_audio
-from agent.intent_router import rule_based_intent, db_init
+from agent.intent_router import rule_based_intent
 from actions.action_executor import db_init
 from actions.action_executor import execute_action
 import threading
@@ -26,10 +26,10 @@ def voice_thread():
         # Checks the transcribed audio with the json file to get the proper
         # command in its current mode
         macro = rule_based_intent(transcribed_text)
-        print("Macro: ", macro)
+        # print("Macro: ", macro)
         
         if macro:
-            # print(macro)
+            print(print("Macro: ", macro))
             # Preforms action linked to the command
             execute_action(macro["action"])
         else:

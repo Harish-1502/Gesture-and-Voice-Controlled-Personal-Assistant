@@ -8,16 +8,21 @@ from scipy.signal import butter, lfilter
 import difflib
 
 known_phrases = []
+# get all the global commands into the array
+with open("config/global_macros.json") as f:
+    command_map = json.load(f)
+known_phrases.extend(command_map.keys())
+print(known_phrases)
 
 with open("config/macros.json") as f:
     command_map = json.load(f)
+# Turn the change to phrase into complete sentences by combining the mode from the macros.json file
+change_to_phrases = [f"change to {phrase} mode" for phrase in command_map.keys()]
+known_phrases.extend(change_to_phrases)
+# Put all the command from the macros.json file into the array 
 for group in command_map.values(): #For each mode 
     if isinstance(group, dict): #If each mode has it's own dict
         known_phrases.extend(group.keys()) #Returns all the keys
-
-with open("config/global_macros.json") as f:
-    command_map = json.load(f)
-known_phrases.extend(command_map.key())
 del command_map
 
 base_dir = os.path.dirname(__file__)  # e.g. .../input/voice_input

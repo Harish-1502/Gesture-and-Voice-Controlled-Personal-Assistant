@@ -49,15 +49,15 @@ from actions.action_executor import get_mode
 base_dir = os.path.dirname(__file__)
 macro_path = os.path.join(base_dir, "../config/macros.json")
 global_macro_path = os.path.join(base_dir, "../config/global_macros.json")
-macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
+# macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
 
-mode_list = []
-with open(os.path.abspath(macro_path)) as f:
-    command_map = json.load(f)
-for group in command_map.keys():
-    mode_list.append(group)
+# mode_list = []
+# with open(os.path.abspath(macro_path)) as f:
+#     command_map = json.load(f)
+# for group in command_map.keys():
+#     mode_list.append(group)
 
-current_mode = ""
+# current_mode = ""
 
 # def set_mode(new_mode):
 #     if new_mode in mode_list:
@@ -99,11 +99,14 @@ with open(os.path.abspath(global_macro_path)) as f:
 def rule_based_intent(text):
     # Turn the command into lower case
     text = text.lower()
-    if text in ["change to"]:
-        mode_name = text.split(phrase, 1)[1].strip()
-        if mode_name.endswith(" mode"):
-            mode_name = mode_name[:-5].strip()
-        return mode_name
+    if text.startswith("change to"):
+        print(text)
+        # mode_name = text.split("change to", 1)[1].strip()
+        # print(mode_name)
+        # if mode_name.endswith(" mode"):
+        #     mode_name = mode_name[:-5].strip()
+        #     print(mode_name)
+        return {"action": text}
 
     current_mode = get_mode()
     # Get action linked to the specified command
