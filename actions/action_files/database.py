@@ -1,4 +1,8 @@
-import sqlite3
+import sqlite3,os
+from actions.action_executor import mode_list 
+
+base_dir = os.path.dirname(__file__)
+macro_manager_path = os.path.join(base_dir,"../../config/macro_manager.db")
 
 def set_mode(new_mode):
     if new_mode in mode_list:

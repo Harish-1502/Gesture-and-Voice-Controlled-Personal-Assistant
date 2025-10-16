@@ -43,7 +43,7 @@
 import json,os,sqlite3
 # import os
 # import sqlite3
-from actions.action_executor import get_mode
+from actions.action_files.database import get_mode
 
 # Used to link the macro_path variable to the macros json file
 base_dir = os.path.dirname(__file__)
