@@ -41,8 +41,6 @@
 #     print("LLM says:", reply)
 
 import json,os,sqlite3
-# import os
-# import sqlite3
 from actions.action_files.database import get_mode
 
 # Used to link the macro_path variable to the macros json file
