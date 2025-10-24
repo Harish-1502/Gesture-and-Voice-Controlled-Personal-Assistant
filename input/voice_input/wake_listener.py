@@ -1,14 +1,18 @@
 import pvporcupine
 import sounddevice as sd
 import queue
-import struct
+import struct, os
 import threading
-# import stream_transcriber
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ACCESS_KEY = os.getenv("ACCESS_KEY")
 
 # wake word is created to respond to jarvis
 def wake_up_detection(stop_event):
     # Will activate when it detects the word Jarvis
-    porcupine = pvporcupine.create(keywords=["jarvis"], access_key="3KesXGRlyX//DpicuvntBNfGUotCX4emjJXM9KKaVHbt9sIeUGXr8A==")
+    porcupine = pvporcupine.create(keywords=["jarvis"], access_key= ACCESS_KEY)
 
     # starts capturing audio from the microphone
     with sd.RawInputStream(

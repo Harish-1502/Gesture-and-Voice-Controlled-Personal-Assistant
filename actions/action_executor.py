@@ -1,132 +1,52 @@
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-import pyautogui
-import webbrowser
-import json
-import sqlite3
-import os
-
+import json, os, importlib, inspect
 
 base_dir = os.path.dirname(__file__)
-macro_manager_path = os.path.join(base_dir,"../config/macro_manager.db")
+daily = os.path.join(base_dir,"./action_files/daily.py")
+wuthering_waves = os.path.join(base_dir,"./action_files/wutering_waves.py")
+files = []
 mode_list = []
-# ------------------------------------------------------
-# All these functions are represent each action
-
-
-def mute():
-    # print("Mute the system")
-    devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    volume = cast(interface, POINTER(IAudioEndpointVolume))
-    volume.SetMute(1,None)
-    
-def close_tab():
-    # print("close tab")
-    pyautogui.hotkey('ctrl', 'w')
-
-def open_brave():
-    webbrowser.open("https://www.brave.com")
-    
-def download():
-    url = pyperclip.paste()
-    if not url.startswith("http"):
-        return print("Not a valid URL")
-    
-    filename = url.split("/")[-1]
-    print("Filename is ",filename)
-    
-    try:
-        response.get(url)
-        with open(filename, wb) as f:
-            f.write(response.content)
-        return print("Download was a success")
-    except Exception as e:
-        return print("Error: ",e)
-
-def print_doc():
-    pyautogui.hotkey('ctrl', 'p')
-
-def parry():
-    pyautogui.click()
-
-def open_menu():
-    pyautogui.hotKey('Esc')
-    
-def next_tab():
-    pyautogui.hotkey('ctrl', 'tab')
-    
-def previous_tab():
-    pyautogui.hotkey('ctrl', 'shift', 'tab')
-
-def volume_up():
-    devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    volume = cast(interface, POINTER(IAudioEndpointVolume))
-    currentVolume = volume.GetMasterVolumeLevelScalar()
-    newVolume = min(currentVolume+0.05,1.0)
-    volume.SetMasterVolumeLevelScalar(newVolume, None)
-    
-def set_mode(new_mode):
-    if new_mode in mode_list:
-        with sqlite3.connect(macro_manager_path) as conn:
-            conn.execute("""
-                INSERT OR REPLACE INTO state (key,value) VALUES (?,?) """, ("mode",new_mode))
-            conn.commit() 
-        return print("Mode change successful")
-    else:
-        return print("Mode change failed")
-
-def get_mode():
-    with sqlite3.connect(macro_manager_path) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT value FROM state WHERE key = 'mode'")
-        row = cursor.fetchone()
-        return row[0] if row else "daily"
-    
-def db_init():
-    with sqlite3.connect(macro_manager_path) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS state (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            )
-        """)
-        conn.commit()
-# ---------------------------------------------------------------------------------------------------    
+action_file = os.path.join(base_dir, "./action_files")  
 
 # Dispatcher holds a copy all the commands to do their respective action
 dispatcher = {}
 
 with open("config/macros.json") as f:
     command_map = json.load(f)
-for group in command_map.values(): #For each mode 
-    if isinstance(group, dict): #If each mode has it's own dict
-        for command,action in group.items():
-            action_detail = action.get("action")
-            global_function = globals().get(action_detail.replace(" ","_"))
-            if global_function:
-                dispatcher[command] = global_function
+                
+for filename in os.listdir(action_file):
+    if filename.endswith(".py") and filename != "__init__.py":
+        module_name = filename[:-3]
+        file_path = os.path.join(action_file, filename)
+        
+        # load the file
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
 
-# with open("config/global_macros.json") as f:
-#     command_map = json.load(f)
-# for command,action in command_map.items():
-#     action_detail = action.get("action")
-#     global_function = globals().get(action_detail.replace(" ","_"))
-#     if global_function:
-#         dispatcher[command] = global_function
+        # Make space in memory for the code from the file
+        module = importlib.util.module_from_spec(spec)
+
+        # Fill the space with the code
+        spec.loader.exec_module(module)
+        
+        # getmembers return a dict. the string has the name from the
+        # method name and the function with the memory location 
+        for name,func in inspect.getmembers(module, inspect.isfunction):
+
+            # Change the underscore to a space
+            dispatcher[name.replace("_", " ")] = func
+            
+
 # Used Lambda to link specific phrases to the set_mode in dispatcher
 for mode_name in command_map.keys():  
-    dispatcher[f"change to {mode_name}"] = (lambda m=mode_name: set_mode(m))
-    dispatcher[f"change to {mode_name} mode"] = (lambda m=mode_name: set_mode(m))
+    dispatcher[f"change to {mode_name}"] = (lambda m=mode_name: dispatcher["set mode"](m))
+    dispatcher[f"change to {mode_name} mode"] = (lambda m=mode_name: dispatcher["set mode"](m))
     mode_list.append(mode_name)
 
 def execute_action(action):
     print(dispatcher)
+    print(action)
     # Finds the command in dispatcher array and executed the action
     if action in dispatcher:
-        print(action)
+        # print(action)
         return dispatcher[action]()
     else:
         return print("action not found")

@@ -1,11 +1,9 @@
 import sounddevice as sd
 import numpy as np 
 from vosk import Model, KaldiRecognizer
-import json
-import os
+import json,os,difflib
 import noisereduce as nr
 from scipy.signal import butter, lfilter
-import difflib
 
 known_phrases = []
 # get all the global commands into the array

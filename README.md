@@ -1,6 +1,6 @@
 # Gesture-and-Voice-Controlled-Personal-Assistant
 
-🔹 Plan for Option 4: Hybrid (Dispatcher + DB)
+Hybrid (Dispatcher + DB)
 
 This is the architecture you’re aiming for — dynamic, persistent, and GUI-friendly.
 
