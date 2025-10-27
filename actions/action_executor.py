@@ -42,7 +42,7 @@ for mode_name in command_map.keys():
     mode_list.append(mode_name)
 
 def execute_action(action):
-    print(dispatcher)
+    # print(dispatcher)
     print(action)
     # Finds the command in dispatcher array and executed the action
     if action in dispatcher:
