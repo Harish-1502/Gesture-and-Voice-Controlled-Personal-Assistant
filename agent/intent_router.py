@@ -1,47 +1,9 @@
-# import requests
-
-# prompt = f"""
-# You are a helpful assistant that turns voice commands into system actions.
-
-# Examples:
-# User: "open browser"
-# Output: {{ "action": "open_app", "target": "browser" }}
-
-# User: "mute volume"
-# Output: {{ "action": "volume_control", "value": "mute" }}
-
-# User: "close the game"
-# Output: {{ "action": "close_app", "target": "game" }}
-
-# Now interpret this:
-# User: user_command
-# Output:
-# """
-
-# def ask_llm(prompt_text):
-#     try:
-#         response = requests.post("http://localhost:11434/api/generate", json={
-#             "model": "gemma:2b",
-#             "prompt": prompt_text,
-#             "stream": False
-#         }, timeout=60)
-
-#         # print("Raw response:", response.status_code)
-#         # print(response.json())  # Debug print
-
-#         return response.json()["response"]
-
-#     except Exception as e:
-#         return f"Exception: {str(e)}"
-    
-    
-# if __name__ == "__main__":
-#     prompt = "Parry."
-#     reply = ask_llm(prompt)
-#     print("LLM says:", reply)
-
 import json,os,sqlite3
 from actions.action_files.database import get_mode
+# from .phi3_ai import ask_phi3
+# from tts import speak
+# from .embedded_matching import match_command
+# from .shared_data import combined
 
 # Used to link the macro_path variable to the macros json file
 base_dir = os.path.dirname(__file__)
@@ -54,29 +16,44 @@ with open(os.path.abspath(macro_path)) as f:
     # DEBUG
     # print(macros)
 
-with open(os.path.abspath(global_macro_path)) as f:
-    global_macros = json.load(f)
+# with open(os.path.abspath(global_macro_path)) as f:
+#     global_macros = json.load(f)
 
 def rule_based_intent(text):
     # Turn the command into lower case
     text = text.lower()
+    action = manual_intent_mapping(text)
+
+    if action:
+        return action
+    else:
+        return None
+
+def manual_intent_mapping(text):
     if text.startswith("change to"):
-        print(text)
+        # print(text)
         return {"action": text}
 
     current_mode = get_mode()
+    # DEBUG
+    # print(current_mode)
+
     # Get action linked to the specified command
     action = macros.get(current_mode,{}).get(text)
     # DEBUG
     # print(action)
+
     if action:
         # DEBUG
         # print(action)
+
         # If action was found, then return it
         return action
-    
-    # TODO: Create logic when the action was not found
-         
+    else:
+        return None
+
+
+# DEBUG
 # if __name__ == "__main__":
 #     result = rule_based_intent("mute")
 #     # print("Result:", result)

@@ -1,4 +1,4 @@
-from input.gesture_service import gesture_service, check_gesture
+from input.gesture_input.gesture_service import gesture_service, check_gesture
 import time
 from agent.intent_router import rule_based_intent
 from actions.action_executor import execute_action
