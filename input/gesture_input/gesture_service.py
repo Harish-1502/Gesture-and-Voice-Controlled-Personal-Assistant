@@ -33,7 +33,7 @@ def gesture_service(stop_event):
       min_detection_confidence=0.5,
       min_tracking_confidence=0.5) as hands:
 
-    # Will the camera is on
+    # While the camera is on
     while cap.isOpened():
       
       # Used for checking if it works
